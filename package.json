@@ -1,0 +1,21 @@
+{
+  "name": "tradelens",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TradeLens – AI Trading Research Assistant Prototype",
+  "scripts": {
+    "dev": "npm --prefix client run dev",
+    "build": "npm --prefix client run build",
+    "client": "npm --prefix client run dev"
+  },
+  "keywords": [
+    "trading",
+    "research",
+    "assistant",
+    "ai",
+    "react",
+    "tailwind"
+  ],
+  "author": "",
+  "license": "ISC"
+}
