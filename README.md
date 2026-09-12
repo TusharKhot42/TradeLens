@@ -9,162 +9,128 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4.svg)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**🔗 Live Demo:** [https://tusharkhot42.github.io/TradeLens/](https://tusharkhot42.github.io/TradeLens/)
+**🔗 Live Application:** [https://tusharkhot42.github.io/TradeLens/](https://tusharkhot42.github.io/TradeLens/)
 
 ---
 
-## 🎯 Overview & Product Thinking
+## 1. Architecture
 
-**TradeLens** is an intelligent full-stack research prototype built for an internship evaluation assignment. 
-
-Trading research requires rigorous, deterministic definitions. When a trader asks a question like:
-> *"Does buying NIFTY after a sharp fall work?"*
-
-Traditional AI systems make silent, hidden assumptions (e.g., arbitrarily deciding that a *"sharp fall"* means 2%). **TradeLens rejects silent assumptions:**
-1. **AI Role**: Parses natural language, extracts candidate instruments, triggers, and flags ambiguous terms.
-2. **Application Code Role**: Controls UI state machines, strict data models, missing-variable validation, and clarification workflows.
-3. **Human Role**: Confirms and clarifies parameters (e.g., selecting whether a sharp fall is `1%`, `2%`, or `Custom %`, and defining the holding duration).
-
----
-
-## 🔄 The 5-Stage Research Workflow
+TradeLens is built on a **decoupled, event-driven Single Page Application (SPA)** architecture designed around a deterministic 5-stage research pipeline:
 
 ```
-[ 1. ASK ] ──▶ [ 2. UNDERSTAND ] ──▶ [ 3. CLARIFY ] ──▶ [ 4. DEFINE ] ──▶ [ 5. FINAL EXPERIMENT ]
-  Input          Decompose logic      Resolve missing      Review model       Exportable backtest
-  hypothesis     via AI parser        parameters           specification      specification
+[ 1. ASK ] ──▶ [ 2. UNDERSTAND ] ──▶ [ 3. CLARIFY ] ──▶ [ 4. DEFINE ] ──▶ [ 5. SPECIFICATION ]
+  Input          Deconstruct Logic     Resolve Missing      Review & Edit      Exportable Backtest
+  Hypothesis     via NLP Parser        Parameters           Normalized Model   Ready Blueprint
 ```
 
-1. **Ask**: Enter any natural-language trading hypothesis or select from curated sample benchmarks.
-2. **Understand**: View the AI's structured parameter breakdown (Market, Timeframe, Entry, Exit, Holding Duration, Regime Filters).
-3. **Clarify**: If parameters are missing or ambiguous (like *"sharp fall"*), targeted UI controls prompt the user to choose exact values. If all parameters were already provided, the system acknowledges full specification with zero redundant questions.
-4. **Define**: Review the consolidated experiment model with full two-way editing controls.
-5. **Final Experiment**: Publication-ready ASCII-bordered specification sheet with copy-to-clipboard functionality and an explicit research disclaimer.
-
----
-
-## 📂 Project Architecture
+### Key Architectural Layers:
+- **Presentation Layer (`client/src/components/`, `pages/`)**:
+  - Declarative UI components styled with an institutional dark financial theme.
+  - Interactive stepper tracking workflow progression across the 5 states.
+  - Granular cards for parameter decomposition, ambiguity badges, interactive clarification controls, and exportable ASCII summary sheets.
+- **State Management Layer (`client/src/context/ExperimentContext.jsx`)**:
+  - Unidirectional state flow powered by React Context and `useReducer`.
+  - Implements a strict finite state machine (`ASK` → `UNDERSTAND` → `CLARIFY` → `DEFINE` → `SUMMARY`).
+  - Encapsulates all action dispatchers (`SET_EXPERIMENT`, `UPDATE_PARAMETER`, `RESOLVE_CLARIFICATION`, `RESET`).
+- **Domain & Validation Layer (`client/src/models/`, `utils/validation.js`)**:
+  - Normalized experiment factory (`createExperiment`) guaranteeing complete schema consistency.
+  - Input validation enforcing minimum query length, market terms, and prevention of junk queries.
+- **NLP & Parsing Engine (`client/src/services/api.js`)**:
+  - Rule-based natural language parsing engine modeling structured entity extraction (instruments, thresholds, durations, regime filters like India VIX).
+  - Explicit ambiguity detection isolating subjective terms (e.g., *"sharp fall"*) without guessing.
 
 ```
 TradeLens Project/
-├── package.json               # Root convenience runner
-├── .gitignore                 # Clean repository exclusions
-├── README.md                  # Project documentation & architecture guide
-└── client/                    # Frontend Client (React + Vite + Tailwind v4)
-    ├── index.html             # Inter & JetBrains Mono typography, custom branding
-    ├── package.json           # Dependencies (React 19, Tailwind CSS v4, Lucide icons)
-    ├── vite.config.js         # Vite configuration with @tailwindcss/vite
-    └── src/
-        ├── models/
-        │   └── experiment.js  # Formal Experiment Schema, factory & spec serializer
-        ├── context/
-        │   └── ExperimentContext.jsx # Centralized React Context + useReducer store
-        ├── utils/
-        │   └── validation.js  # Validation logic for inputs and parameters
-        ├── services/
-        │   └── api.js         # Modular natural language parser & API abstraction
-        ├── components/
-        │   ├── Header.jsx             # Institutional branding & 5-step workflow stepper
-        │   ├── QuestionInput.jsx      # Research command bar with preset benchmark chips
-        │   ├── ExperimentCard.jsx     # AI interpretation decomposition & alert badges
-        │   ├── ClarificationPanel.jsx # Targeted clarification controls & validation
-        │   ├── DefineExperiment.jsx   # Consolidated structured parameter model
-        │   ├── ExperimentSummary.jsx  # Final ASCII export sheet & research disclaimer
-        │   ├── LoadingState.jsx       # Real-time parsing indicator
-        │   └── ErrorMessage.jsx       # Error banner with retry mechanism
-        ├── pages/
-        │   └── Home.jsx               # Declarative workflow coordinator
-        ├── App.jsx                    # Root component with ExperimentProvider
-        ├── index.css                  # Institutional dark financial terminal design system
-        └── main.jsx                   # React entry point
+├── client/
+│   ├── src/
+│   │   ├── components/      # UI components (Stepper, Cards, Forms, Sheets)
+│   │   ├── context/         # Centralized State Machine (Context + useReducer)
+│   │   ├── models/          # Deterministic Experiment Schema & Serializer
+│   │   ├── services/        # Natural Language Parsing Engine
+│   │   ├── utils/           # Input and Parameter Validation
+│   │   ├── pages/Home.jsx   # Research Workflow Orchestrator
+│   │   ├── App.jsx          # Root Context Provider
+│   │   └── index.css        # Financial Terminal Design System
+│   ├── index.html           # Typography & Meta Headers
+│   └── vite.config.js       # Vite + Tailwind v4 build setup
+├── .github/workflows/       # Automated CI/CD deployment to GitHub Pages
+├── deploy.ps1               # One-command automated deployment script
+└── package.json             # Root workspace runner
 ```
 
 ---
 
-## 📊 Experiment Data Model Schema
+## 2. Technologies Used
 
-Every experiment is normalized into the following deterministic schema (`client/src/models/experiment.js`):
+| Technology | Role & Purpose |
+| :--- | :--- |
+| **React 19** | Modern declarative UI foundation leveraging latest concurrent rendering patterns. |
+| **Vite 8.3** | Ultra-fast build tool, local dev server, and production Rollup bundler. |
+| **Tailwind CSS v4** | Next-gen zero-config CSS engine with high-performance CSS-first styling. |
+| **Lucide React** | Lightweight, clean financial iconography. |
+| **Google Fonts (Inter & JetBrains Mono)** | Typography pairing for readability and terminal-grade parameter inspection. |
+| **Oxlint** | High-performance linter for code health and clean syntax. |
+| **GitHub Actions & GitHub Pages** | Automated continuous deployment pipeline triggered on every push to `main`. |
 
-```json
-{
-  "id": "exp_1789145099257_8r2ned",
-  "instrument": "NIFTY",
-  "timeframe": "Daily",
-  "entryCondition": "NIFTY falls >= 1%",
-  "exitCondition": "After 3 trading days",
-  "holdingPeriod": "3 days",
-  "filters": [],
-  "researchQuestion": "Does buying NIFTY after a 1% fall have an edge?",
-  "missingInformation": [],
-  "isAmbiguous": false,
-  "status": "defined",
-  "createdAt": "2026-09-11T16:44:59.257Z",
-  "updatedAt": "2026-09-11T16:45:30.120Z"
-}
+---
+
+## 3. AI Tools Used
+
+- **Antigravity / Gemini 3.8**:
+  - **System Design & Pair Programming**: Used as an AI pair-programmer to plan state boundaries, refine component responsibilities, and structure the 5-stage UX workflow.
+  - **Schema & Parser Modeling**: Assisted in synthesizing regex heuristics and parameter extraction rules to parse complex financial phrasing into deterministic experiment models.
+  - **Edge-Case Simulation**: Used to formulate and stress-test test questions across incomplete, ambiguous, multi-filter, and fully-specified trading hypotheses.
+
+---
+
+## 4. Key Decisions
+
+1. **Rejection of Silent AI Assumptions (Core Product Philosophy)**:
+   - *Problem*: Traditional LLMs silently invent arbitrary values when given ambiguous prompts (e.g., arbitrarily assuming *"sharp fall"* = 2% or choosing a 5-day holding period without asking).
+   - *Solution*: TradeLens explicitly flags ambiguous parameters as missing, displays visual warning badges, and opens dedicated human-in-the-loop clarification controls.
+2. **Deterministic Schema Normalization**:
+   - Every parsed hypothesis is transformed into a rigid, immutable data model schema with unique identifiers, explicit entry/exit conditions, holding durations, and filter arrays.
+3. **Zero Redundant Questions (Smart Bypass)**:
+   - If a user provides a complete hypothesis (e.g., *"Does buying Bank NIFTY after a 3% fall and holding for 5 days work?"*), the system recognizes 100% parameter completeness and skips asking redundant questions.
+4. **Two-Way Editable Experiment Parameters**:
+   - In Stage 4 (Define), users are not locked into the AI's initial extraction. Every single parameter (instrument, timeframe, percentages, exits, and filters) remains fully editable prior to finalizing the specification.
+5. **Decoupled Client-Side Prototype**:
+   - The application was intentionally designed as an autonomous client-side architecture to provide instant response times, zero cold starts, offline resilience, and immediate zero-cost hosting deployment.
+
+---
+
+## 5. What I Would Improve With More Time
+
+1. **Direct Integration with Live Backtesting Engines**:
+   - Connect the generated specification sheet directly to a Python backtesting worker (`vectorbt` / `backtrader` / `FastAPI`) connected to live market feeds (Zerodha Kite API, Yahoo Finance) to execute instant historical backtests and display equity curves, Sharpe ratio, and max drawdown.
+2. **LLM Function Calling via Backend Agent**:
+   - Augment the client-side parser with an OpenAI/Gemini structured outputs API endpoint (`function_calling` / JSON Schema) for handling arbitrary multi-sentence natural language trading ideas.
+3. **Multi-Condition & Indicator Rule Builder**:
+   - Expand beyond price changes to support complex indicator combinations (e.g., RSI Divergence, Bollinger Band squeeze, Moving Average crossovers, Volume spikes).
+4. **Code Export to Multiple Algorithmic Frameworks**:
+   - Add one-click export to **Pine Script (TradingView)**, **Python (Backtrader/VectorBT)**, and **Interactive Brokers API** code templates.
+5. **Persistence & Strategy Comparison**:
+   - Implement Supabase / SQLite storage for saved hypotheses, enabling strategy versioning, tag-based search, and side-by-side backtest result comparisons.
+
+---
+
+## 🚀 Running Locally
+
+```bash
+# Clone the repository
+git clone https://github.com/TusharKhot42/TradeLens.git
+cd TradeLens
+
+# Install dependencies and start client
+cd client
+npm install
+npm run dev
 ```
 
----
-
-## 🧪 Supported Evaluation Hypotheses
-
-TradeLens includes out-of-the-box parsing for the assignment test cases:
-
-1. `"Does buying NIFTY after a 1% fall have an edge?"`  
-   *(Identifies missing holding period and exit conditions; prompts clarification).*
-2. `"Does buying NIFTY after a sharp fall work?"`  
-   *(Detects ambiguous "sharp fall"; prompts user for exact % decline threshold).*
-3. `"Does buying NIFTY after a 2% fall work better during high-volatility periods?"`  
-   *(Extracts 2% entry threshold and India VIX > 18 volatility filter).*
-4. `"Does buying Bank NIFTY after a 3% fall and holding for 5 days work?"`  
-   *(100% complete: recognizes 5-day horizon; skips redundant questions).*
-5. `"Does buying NIFTY after a 1% fall work over a 3-day holding period?"`  
-   *(100% complete: extracts 3-day holding period directly).*
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-- **Node.js** v18+ (tested on Node v24)
-- **npm** v9+
-
-### Installation & Running Locally
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/TusharKhot42/tradelens.git
-   cd tradelens
-   ```
-
-2. **Install dependencies**:
-   ```bash
-   cd client
-   npm install
-   ```
-
-3. **Start the local development server**:
-   ```bash
-   npm run dev
-   ```
-   Open **[http://localhost:5173](http://localhost:5173)** in your browser.
-
-4. **Build for production**:
-   ```bash
-   npm run build
-   ```
-
----
-
-## ☁️ Deployment (Vercel)
-
-The frontend is ready for zero-config Vercel deployment:
-1. Push this repository to GitHub.
-2. Import the repository into [Vercel](https://vercel.com).
-3. Set the **Root Directory** to `client`.
-4. Deploy! Vite and Tailwind CSS will automatically build and serve globally.
+Visit **[http://localhost:5173](http://localhost:5173)**.
 
 ---
 
 ## ⚠️ Research Scope Disclaimer
 
-TradeLens is designed to structure natural-language trading ideas into testable, reproducible hypotheses. It does **not** claim that any strategy is profitable, nor does it provide financial, investment, or trading advice.
+TradeLens is designed to structure natural-language trading hypotheses into reproducible research blueprints. It does **not** provide financial, investment, or trading advice.
