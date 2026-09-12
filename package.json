@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "npm --prefix client run dev",
     "build": "npm --prefix client run build",
-    "client": "npm --prefix client run dev"
+    "client": "npm --prefix client run dev",
+    "deploy": "npm run build && powershell -ExecutionPolicy Bypass -File ./deploy.ps1"
   },
   "keywords": [
     "trading",
