@@ -3,10 +3,13 @@
 > **Turn unstructured trading questions into structured, backtest-ready research experiments.**  
 > *Demonstrating Human Product Thinking + AI Assistance.*
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-GitHub_Pages-brightgreen?style=flat&logo=github)](https://tusharkhot42.github.io/TradeLens/)
 [![React](https://img.shields.io/badge/React-19-blue.svg)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-8.3-646CFF.svg)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4.svg)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+**🔗 Live Demo:** [https://tusharkhot42.github.io/TradeLens/](https://tusharkhot42.github.io/TradeLens/)
 
 ---
 
